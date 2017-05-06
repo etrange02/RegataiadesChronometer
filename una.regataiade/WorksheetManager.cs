@@ -94,16 +94,22 @@ namespace una.regataiade
         {
             if (!IsOpen())
                 return;
-
-            if (raceTime.Departure != null)
+            
+            try
             {
-                _sheet.Cells[Offset + raceTime.Order, 1] = raceTime.Order;
-                _sheet.Cells[Offset + raceTime.Order, 2] = raceTime.Departure;
+                if (raceTime.Departure != null)
+                {
+                    _sheet.Cells[Offset + raceTime.Order, 1] = raceTime.Order;
+                    _sheet.Cells[Offset + raceTime.Order, 2] = raceTime.Departure;
+                }
+                else if (raceTime.Arrival != null)
+                {
+                    _sheet.Cells[Offset + raceTime.Order, 3] = raceTime.Order;
+                    _sheet.Cells[Offset + raceTime.Order, 4] = raceTime.Arrival;
+                }
             }
-            else if (raceTime.Arrival != null)
+            catch (Exception e)
             {
-                _sheet.Cells[Offset + raceTime.Order, 3] = raceTime.Order;
-                _sheet.Cells[Offset + raceTime.Order, 4] = raceTime.Arrival;
             }
         }
     }
