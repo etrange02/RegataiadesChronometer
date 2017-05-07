@@ -4,7 +4,6 @@ using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.CommandWpf;
 using System.IO;
 using System;
-using System.Windows.Input;
 using System.Windows.Forms;
 using una.regataiade;
 using una.regataiade.excel;
@@ -141,16 +140,6 @@ namespace Chronometer.ViewModel
             }
         }
 
-        /*private string _workbookName;
-        public string WorkbookName
-        {
-            get { return _workbookName; }
-            set
-            {
-                Set(ref _workbookName, value);
-            }
-        }*/
-
         public bool IsWorkbookOpened => !string.IsNullOrEmpty(WorkbookPath);      
         public bool IsSheetSelected => IsWorkbookOpened && Sheet != null;
         public bool CanChangeSheet => IsWorkbookOpened && !IsSheetLocked;
@@ -186,7 +175,7 @@ namespace Chronometer.ViewModel
             }
         }
 
-        private int _offset;
+        private int _offset = 0;
         public int Offset
         {
             get { return _offset; }
@@ -197,7 +186,7 @@ namespace Chronometer.ViewModel
             }
         }
 
-        private bool _canBeep;
+        private bool _canBeep = true;
         public bool CanBeep
         {
             get { return _canBeep; }
@@ -269,31 +258,38 @@ namespace Chronometer.ViewModel
         #region Methods
         private void SerialPort_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs args)
         {
-            var res = _chronograph.Interpret(_serialPortManager.SerialPort);
-            res.Order += _worksheetManager.Offset;
             try
             {
-                _worksheetManager.AddRaceTime(res);
-            }
-            catch (Exception exception)
-            {
-                Logs.Add(exception.Message);
-                BeepSound();
-            }
+                var res = _chronograph.Interpret(_serialPortManager.SerialPort);
+                res.Order += _worksheetManager.Offset;
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    if (res.Departure != null)
+                    {
+                        Departures.Add(res);
+                        _writer.WriteLine($"1-{res.Order}-{res.Departure}");
+                    }
+                    else if (res.Arrival != null)
+                    {
+                        Arrivals.Add(res);
+                        _writer.WriteLine($"2-{res.Order}-{res.Arrival}");
+                    }
+                });
 
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                try
+                {
+                    _worksheetManager.AddRaceTime(res);
+                }
+                catch (Exception exception)
+                {
+                    Logs.Add(exception.Message);
+                    BeepSound();
+                }
+            }
+            catch (Exception)
             {
-                if (res.Departure != null)
-                {
-                    Departures.Add(res);
-                    _writer.WriteLine($"1-{res.Order}-{res.Departure}");
-                }
-                else if (res.Arrival != null)
-                {
-                    Arrivals.Add(res);
-                    _writer.WriteLine($"2-{res.Order}-{res.Arrival}");
-                }
-            });
+                // I said no crash !
+            }
         }
         #endregion
 

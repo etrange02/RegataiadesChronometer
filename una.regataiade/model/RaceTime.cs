@@ -11,5 +11,6 @@ namespace una.regataiade
         public string Departure { get; set; }
         public string Arrival { get; set; }
         public int Order { get; set; }
+        public bool Saved { get; set; }
     }
 }

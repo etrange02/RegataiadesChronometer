@@ -14,9 +14,13 @@ namespace una.regataiade.excel
         {
             get
             {
-                if (!string.IsNullOrEmpty(_raceTime.Departure))
+                if (_raceTime == null)
+                    return "No time received";
+                if (_raceTime.Departure != null)
                     return $"Time not set: Departure-({_raceTime.Order} - {_raceTime.Departure})";
-                return $"Time not set: Arrival-({_raceTime.Order} - {_raceTime.Arrival})";
+                else if (_raceTime.Arrival != null)
+                    return $"Time not set: Arrival-({_raceTime.Order} - {_raceTime.Arrival})";
+                return $"Error on set {_raceTime.Order}, no time data";
             }
         }
     }
