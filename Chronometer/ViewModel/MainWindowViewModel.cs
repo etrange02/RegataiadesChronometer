@@ -7,14 +7,20 @@ using System;
 using System.Windows.Input;
 using System.Windows.Forms;
 using una.regataiade;
+using una.regataiade.excel;
 
 namespace Chronometer.ViewModel
 {
     public class MainWindowViewModel : ViewModelBase
     {
+        private SerialPortManager _serialPortManager = new SerialPortManager();
+        private WorksheetManager _worksheetManager = new WorksheetManager();
+        private FileStream _file;
+        private StreamWriter _writer;
+
         public RelayCommand RefreshAvailableCOMPortsCommand { get; private set; }
         public RelayCommand CloseCOMPortsCommand { get; private set; }
-        public RelayCommand InitialiseTraceFileMenuItemCommand { get; private set; }
+        public RelayCommand InitializeTraceFileMenuItemCommand { get; private set; }
         public RelayCommand ClearListMenuItemCommand { get; private set; }
         public RelayCommand QuitMenuItemCommand { get; private set; }
         public RelayCommand AboutMenuItemCommand { get; private set; }
@@ -23,14 +29,9 @@ namespace Chronometer.ViewModel
         public RelayCommand OpenExcelCommand { get; private set; }
         public RelayCommand LockSheetPropertiesCommand { get; private set; }
         public RelayCommand UnlockSheetPropertiesCommand { get; private set; }
-        public RelayCommand MoveOrderNumberCommand { get; private set; }
         public ObservableCollection<RaceTime> Departures { get; set; } = new ObservableCollection<RaceTime>();
         public ObservableCollection<RaceTime> Arrivals { get; set; } = new ObservableCollection<RaceTime>();
-
-        private SerialPortManager _serialPortManager = new SerialPortManager();
-        private WorksheetManager _worksheetManager = new WorksheetManager();
-        private FileStream _file;
-        private StreamWriter _writer;
+        public ObservableCollection<string> Logs { get; set; } = new ObservableCollection<string>();        
 
         public MainWindowViewModel()
         {
@@ -73,21 +74,19 @@ namespace Chronometer.ViewModel
                 });
             }
 
-            InitialiseTraceFileMenuItemCommand = new RelayCommand(ExecuteInitialiseTraceFileMenuItemCommand);
+            InitializeTraceFileMenuItemCommand = new RelayCommand(ExecuteInitializeTraceFileMenuItemCommand);
             ClearListMenuItemCommand = new RelayCommand(ExecuteClearListMenuItemCommand);
             QuitMenuItemCommand = new RelayCommand(ExecuteQuitMenuItemCommand);
             RefreshAvailableCOMPortsCommand = new RelayCommand(ExecuteRefreshAvailableCOMPortsCommand);
             OpenChronographLinkCommand = new RelayCommand(ExecuteOpenChronographLinkCommand, CanExecuteOpenChronographLinkCommand);
             CloseCOMPortsCommand = new RelayCommand(ExecuteCloseCOMPortsCommand, CanExecuteCloseCOMPortsCommand);
-            //RefreshAvailableCOMPortsCommand = new RelayCommand(ExecuteRefreshAvailableCOMPortsCommand);
             
             OpenExcelCommand = new RelayCommand(ExecuteOpenExcelCommand, CanExecuteOpenExcelCommand);
             LockSheetPropertiesCommand = new RelayCommand(ExecuteLockSheetPropertiesCommand, CanExecuteLockSheetPropertiesCommand);
             UnlockSheetPropertiesCommand = new RelayCommand(ExecuteUnlockSheetPropertiesCommand, CanExecuteUnlockSheetPropertiesCommand);
-            MoveOrderNumberCommand = new RelayCommand(ExecuteMoveOrderNumberCommand, CanExecuteMoveOrderNumberCommand);
-
+            
             ExecuteRefreshAvailableCOMPortsCommand();
-            ExecuteInitialiseTraceFileMenuItemCommand();
+            ExecuteInitializeTraceFileMenuItemCommand();
 
             _serialPortManager.SerialPort.DataReceived += SerialPort_DataReceived;
         }
@@ -187,8 +186,26 @@ namespace Chronometer.ViewModel
             }
         }
 
+        private int _offset;
+        public int Offset
+        {
+            get { return _offset; }
+            set
+            {
+                Set(ref _offset, value);
+                _worksheetManager.Offset = value;
+            }
+        }
+
+        private bool _canBeep;
+        public bool CanBeep
+        {
+            get { return _canBeep; }
+            set { Set(ref _canBeep, value); }
+        }
+
         #region File
-        private void ExecuteInitialiseTraceFileMenuItemCommand()
+        private void ExecuteInitializeTraceFileMenuItemCommand()
         {
             _file?.Close();
             _file = File.Open("Trace_" + DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss") + ".txt", FileMode.CreateNew);
@@ -250,21 +267,31 @@ namespace Chronometer.ViewModel
         #endregion
 
         #region Methods
-        private void SerialPort_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
+        private void SerialPort_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs args)
         {
             var res = _chronograph.Interpret(_serialPortManager.SerialPort);
-            _worksheetManager.AddRaceTime(res);
+            res.Order += _worksheetManager.Offset;
+            try
+            {
+                _worksheetManager.AddRaceTime(res);
+            }
+            catch (Exception exception)
+            {
+                Logs.Add(exception.Message);
+                BeepSound();
+            }
+
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
                 if (res.Departure != null)
                 {
                     Departures.Add(res);
-                    _writer.WriteLine("1-" + res.Departure);
+                    _writer.WriteLine($"1-{res.Order}-{res.Departure}");
                 }
                 else if (res.Arrival != null)
                 {
                     Arrivals.Add(res);
-                    _writer.WriteLine("2-" + res.Arrival);
+                    _writer.WriteLine($"2-{res.Order}-{res.Arrival}");
                 }
             });
         }
@@ -310,20 +337,12 @@ namespace Chronometer.ViewModel
             IsSheetLocked = false;
         }
 
-        private bool CanExecuteMoveOrderNumberCommand()
-        {
-            return true;
-        }
-
-        private void ExecuteMoveOrderNumberCommand()
-        {
-            // Assembly Microsoft.VisualBasic, should disappear
-            string input = Microsoft.VisualBasic.Interaction.InputBox("Change offset", "Offset", "" + _worksheetManager.Offset, -1, -1);
-            int result = 0;
-            if (int.TryParse(input, out result))
-                _worksheetManager.Offset = result;
-        }
-
         #endregion
+
+        public void BeepSound()
+        {
+            if (CanBeep)
+                Console.Beep();
+        }
     }
 }

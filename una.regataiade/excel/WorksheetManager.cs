@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 
-namespace una.regataiade
+namespace una.regataiade.excel
 {
     public class WorksheetManager
     {
@@ -93,23 +93,24 @@ namespace una.regataiade
         public void AddRaceTime(RaceTime raceTime)
         {
             if (!IsOpen())
-                return;
+                throw new Exception("No excel link");
             
             try
             {
                 if (raceTime.Departure != null)
                 {
-                    _sheet.Cells[Offset + raceTime.Order, 1] = raceTime.Order;
-                    _sheet.Cells[Offset + raceTime.Order, 2] = raceTime.Departure;
+                    _sheet.Cells[raceTime.Order, 1] = raceTime.Order;
+                    _sheet.Cells[raceTime.Order, 2] = raceTime.Departure;
                 }
                 else if (raceTime.Arrival != null)
                 {
-                    _sheet.Cells[Offset + raceTime.Order, 3] = raceTime.Order;
-                    _sheet.Cells[Offset + raceTime.Order, 4] = raceTime.Arrival;
+                    _sheet.Cells[raceTime.Order, 3] = raceTime.Order;
+                    _sheet.Cells[raceTime.Order, 4] = raceTime.Arrival;
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
+                throw new RaceTimeNotAddedException(raceTime);
             }
         }
     }

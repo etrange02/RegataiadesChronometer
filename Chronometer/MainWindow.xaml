@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:Chronometer"
         xmlns:viewmodel="clr-namespace:Chronometer.ViewModel"
         xmlns:converter="clr-namespace:Chronometer.Converter"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
         Title="Regataïades Chronometer"
         Height="350"
@@ -22,59 +23,44 @@
                                                 FalseValue="Visible"/>
     </Window.Resources>
     <DockPanel>
-        <Menu DockPanel.Dock="Top">
-            <MenuItem Header="File">
-                <MenuItem Header="Initialise Trace File" Command="{Binding InitialiseTraceFileMenuItemCommand}" />
-                <MenuItem Header="Clear lists" Command="{Binding ClearListMenuItemCommand}" />
-                <Separator />
-                    <MenuItem Header="Move Order Number" Command="{Binding MoveOrderNumberCommand}" />
-                <Separator />
-                <MenuItem Header="Quit" Command="{Binding QuitMenuItemCommand}" />
-            </MenuItem>
-            <MenuItem Header="About" Command="{Binding AboutMenuItemCommand}" />
-        </Menu>
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            <Expander Grid.Row="0"
-                Header="Parameters">                
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="24" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="60" />
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-                    <TextBlock Grid.Column="0"
+        <Expander DockPanel.Dock="Top"
+                  Header="Parameters">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="24" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="60" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Column="0"
                                Grid.Row="0"
                                Margin="2" 
                                Text="Chronometer"
                                VerticalAlignment="Center"/>
-                    <ComboBox ItemsSource="{Binding AvailableComPorts}"
+                <ComboBox ItemsSource="{Binding AvailableComPorts}"
                               SelectedItem="{Binding ComPort}"
                               Margin="2,2,0,2"
                               Grid.Column="1"
                               Grid.Row="0"
                               VerticalAlignment="Center"
                               IsEnabled="{Binding IsSerialPortOpened, Converter={StaticResource NotBooleanConverter}}" />
-                    <Button Grid.Column="2"
+                <Button Grid.Column="2"
                             Grid.Row="0"
                             Margin="0,2,2,2"
                             VerticalAlignment="Center"
                             Command="{Binding RefreshAvailableCOMPortsCommand}"
                             IsEnabled="{Binding IsSerialPortOpened, Converter={StaticResource NotBooleanConverter}}">
-                        <StackPanel>
-                            <Image Source="pack://application:,,,/resource/refresh.png" />
-                        </StackPanel>
-                    </Button>
-                    <ComboBox Grid.Column="3"
+                    <StackPanel>
+                        <Image Source="pack://application:,,,/resource/refresh.png" />
+                    </StackPanel>
+                </Button>
+                <ComboBox Grid.Column="3"
                               Grid.Row="0"
                               ItemsSource="{Binding Chronographies}"
                               SelectedItem="{Binding Chronograph}"
@@ -82,104 +68,146 @@
                               Margin="2" 
                               VerticalAlignment="Center"
                               IsEnabled="{Binding IsSerialPortOpened, Converter={StaticResource NotBooleanConverter}}" />
-                    <Button Grid.Column="4"
+                <Button Grid.Column="4"
                             Grid.Row="0"
                             Margin="2"
                             Content="Open"
                             Command="{Binding OpenChronographLinkCommand}"
                             Visibility="{Binding IsSerialPortOpened, Converter={StaticResource NotBooleanToVisibilityConverter}}">
-                    </Button>
-                    <Button Grid.Column="4"
+                </Button>
+                <Button Grid.Column="4"
                             Grid.Row="0"
                             Margin="2"
                             Content="Close"
                             Command="{Binding CloseCOMPortsCommand}"
                             Visibility="{Binding IsSerialPortOpened, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    </Button>
+                </Button>
 
-                    <TextBlock Grid.Column="0"
+                <TextBlock Grid.Column="0"
                                Grid.Row="1"
                                Margin="2" 
                                Text="Excel"
                                VerticalAlignment="Center"/>
-                    <TextBox Grid.Row="1"
+                <TextBox Grid.Row="1"
                              Grid.Column="1"
                              Margin="2,2,0,2" 
                              Text="{Binding WorkbookPath}"
-                             IsEnabled="False">                        
-                    </TextBox>
-                    <Button Grid.Column="2"
+                             IsEnabled="False">
+                </TextBox>
+                <Button Grid.Column="2"
                             Grid.Row="1"
                             Margin="0,2,2,2"
                             VerticalAlignment="Center"
                             Command="{Binding OpenExcelCommand}"
                             IsEnabled="{Binding IsSheetLocked, Converter={StaticResource NotBooleanConverter}}">
-                        <StackPanel>
-                            <Image Source="pack://application:,,,/resource/Open_Folder.png" />
-                        </StackPanel>
-                    </Button>
-                    <ComboBox Grid.Column="3"
+                    <StackPanel>
+                        <Image Source="pack://application:,,,/resource/Open_Folder.png" />
+                    </StackPanel>
+                </Button>
+                <ComboBox Grid.Column="3"
                               Grid.Row="1"
                               ItemsSource="{Binding Sheets}"
                               SelectedItem="{Binding Sheet}"
                               Margin="2" 
                               VerticalAlignment="Center"
-                              IsEnabled="{Binding CanChangeSheet}" />
-                    <Button Grid.Column="4"
+                              IsEnabled="{Binding CanChangeSheet}"
+                              ToolTip="Sheet where results must be inserted" />
+                <Button Grid.Column="4"
                             Grid.Row="1"
                             Margin="2"
                             Content="Lock"
                             IsEnabled="{Binding IsSheetSelected}"
                             Command="{Binding LockSheetPropertiesCommand}"
                             Visibility="{Binding IsSheetLocked, Converter={StaticResource NotBooleanToVisibilityConverter}}">
-                    </Button>
-                    <Button Grid.Column="4"
+                </Button>
+                <Button Grid.Column="4"
                             Grid.Row="1"
                             Margin="2"
                             Content="Unlock"
                             Command="{Binding UnlockSheetPropertiesCommand}"
                             Visibility="{Binding IsSheetLocked, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    </Button>
+                </Button>
+                <Button Grid.Column="0"
+                            Grid.Row="2"
+                            Content="Initialize trace file"
+                            Command="{Binding InitialiseTraceFileMenuItemCommand}"
+                            Margin="2" />
+                <Button Grid.Column="1"
+                            Grid.Row="2"
+                            Content="Clear lists"
+                            Command="{Binding ClearListMenuItemCommand}"
+                            Margin="2" />
+                <Grid Grid.Column="3"
+                          Grid.Row="2"
+                          VerticalAlignment="Center"
+                          HorizontalAlignment="Stretch"
+                          ToolTip="Offset in Excel sheet">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Offset"
+                                   Margin="2"
+                                   Grid.Column="0" />
+                    <xctk:IntegerUpDown Value="{Binding Offset, Mode=TwoWay}"
+                                            Minimum="0"
+                                            Increment="1"
+                                            Margin="2"
+                                            Grid.Column="1" />
                 </Grid>
-            </Expander>
-            <Grid Grid.Row="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <GroupBox Grid.Column="0"
-                          Header="Departure">
-                    <ListBox x:Name="Departures" 
-                             ItemsSource="{Binding Departures}"
-                             Background="#FFC0FFC0">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock>
-                                    <Run Text="{Binding Order, StringFormat={}{0:000}}" />
-                                    <Run Text=" - " />
-                                    <Run Text="{Binding Departure}" />
-                                </TextBlock>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </GroupBox>
-                <GroupBox Grid.Column="1"
-                          Header="Arrival">
-                    <ListBox x:Name="Arrivals" 
-                             ItemsSource="{Binding Arrivals}"
-                             Background="#FFFFC0C0">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock>
-                                    <Run Text="{Binding Order, StringFormat={}{0:000}}"/>
-                                    <Run Text=" - "/>
-                                    <Run Text="{Binding Arrival}"/>
-                                </TextBlock>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </GroupBox>
+                <CheckBox Grid.Row="2"
+                              Grid.Column="4"
+                              Content="Beep"
+                              IsChecked="{Binding CanBeep}"
+                              VerticalAlignment="Center"
+                              Margin="2"
+                              ToolTip="A beep is emitted when a warning is added in logs"/>
             </Grid>
+        </Expander>
+        <GroupBox Header="Logs"
+                  DockPanel.Dock="Bottom"
+                  Height="110">
+            <ListBox x:Name="Logs" 
+                    ItemsSource="{Binding Logs}">
+            </ListBox>
+        </GroupBox>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <GroupBox Grid.Column="0"
+                        Header="Departure">
+                <ListBox x:Name="Departures" 
+                            ItemsSource="{Binding Departures}"
+                            Background="#FFC0FFC0">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock>
+                                <Run Text="{Binding Order, StringFormat={}{0:000}}" />
+                                <Run Text=" - " />
+                                <Run Text="{Binding Departure}" />
+                            </TextBlock>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </GroupBox>
+            <GroupBox Grid.Column="1"
+                        Header="Arrival">
+                <ListBox x:Name="Arrivals" 
+                            ItemsSource="{Binding Arrivals}"
+                            Background="#FFFFC0C0">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock>
+                                <Run Text="{Binding Order, StringFormat={}{0:000}}"/>
+                                <Run Text=" - "/>
+                                <Run Text="{Binding Arrival}"/>
+                            </TextBlock>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </GroupBox>
         </Grid>
     </DockPanel>
 </Window>

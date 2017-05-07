@@ -45,9 +45,10 @@
     <Compile Include="chronograph\ChronographCP520.cs" />
     <Compile Include="chronograph\ChronographFactory.cs" />
     <Compile Include="chronograph\SerialPortManager.cs" />
+    <Compile Include="excel\RaceTimeNotAddedException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="model\RaceTime.cs" />
-    <Compile Include="WorksheetManager.cs" />
+    <Compile Include="excel\WorksheetManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <COMReference Include="Microsoft.Office.Core">

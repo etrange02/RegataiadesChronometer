@@ -26,6 +26,7 @@ namespace Chronometer
             InitializeComponent();
             ((INotifyCollectionChanged)Departures.Items).CollectionChanged += ListBox_CollectionChanged;
             ((INotifyCollectionChanged)Arrivals.Items).CollectionChanged += ListBox_CollectionChanged;
+            ((INotifyCollectionChanged)Logs.Items).CollectionChanged += ListBox_CollectionChanged;
         }
 
         private void ListBox_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
