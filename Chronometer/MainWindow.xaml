@@ -21,6 +21,8 @@
         <converter:BooleanToVisibilityConverter x:Key="NotBooleanToVisibilityConverter" 
                                                 TrueValue="Collapsed" 
                                                 FalseValue="Visible"/>
+        <converter:BooleanToColorConverter x:Key="BooleanToColorConverter"
+                                           FalseColor="Red" />
     </Window.Resources>
     <DockPanel>
         <Expander DockPanel.Dock="Top"
@@ -155,13 +157,6 @@
                                             Margin="2"
                                             Grid.Column="1" />
                 </Grid>
-                <CheckBox Grid.Row="2"
-                              Grid.Column="4"
-                              Content="Beep"
-                              IsChecked="{Binding CanBeep}"
-                              VerticalAlignment="Center"
-                              Margin="2"
-                              ToolTip="A beep is emitted when a warning is added in logs"/>
             </Grid>
         </Expander>
         <GroupBox Header="Logs"
@@ -169,6 +164,11 @@
                   Height="110">
             <ListBox x:Name="Logs" 
                     ItemsSource="{Binding Logs}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Path=.}" />
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
             </ListBox>
         </GroupBox>
         <Grid>
@@ -183,11 +183,27 @@
                             Background="#FFC0FFC0">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock>
-                                <Run Text="{Binding Order, StringFormat={}{0:000}}" />
-                                <Run Text=" - " />
-                                <Run Text="{Binding Departure}" />
-                            </TextBlock>
+                            <Grid ShowGridLines="True"
+                                  HorizontalAlignment="Stretch"
+                                  VerticalAlignment="Stretch"
+                                  Background="{Binding Saved, Converter={StaticResource BooleanToColorConverter}}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" 
+                                           Text="{Binding Order, StringFormat={}{0:000}}"
+                                           Margin="5, 2" />
+                                <TextBlock Grid.Column="1" 
+                                           Text="{Binding Departure}"
+                                           Margin="5, 2" />
+                                <Button Grid.Column="2"
+                                        Content="Resend"
+                                        Margin="5, 2"
+                                        Command="{Binding Resend}"
+                                        CommandParameter="{Binding}" />
+                            </Grid>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
@@ -199,11 +215,27 @@
                             Background="#FFFFC0C0">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock>
-                                <Run Text="{Binding Order, StringFormat={}{0:000}}"/>
-                                <Run Text=" - "/>
-                                <Run Text="{Binding Arrival}"/>
-                            </TextBlock>
+                            <Grid ShowGridLines="True"
+                                  HorizontalAlignment="Stretch"
+                                  VerticalAlignment="Stretch"
+                                  Background="{Binding Saved, Converter={StaticResource BooleanToColorConverter}}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" 
+                                               Text="{Binding Order, StringFormat={}{0:000}}"
+                                               Margin="5, 2" />
+                                <TextBlock Grid.Column="1" 
+                                               Text="{Binding Arrival}"
+                                               Margin="5, 2" />
+                                <Button Grid.Column="2"
+                                            Content="Resend"
+                                            Margin="5, 2"
+                                            Command="{Binding Resend}"
+                                            CommandParameter="{Binding}"/>
+                            </Grid>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>

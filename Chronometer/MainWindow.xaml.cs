@@ -21,6 +21,7 @@ namespace Chronometer
         {
             EnsureLastVisible(Departures);
             EnsureLastVisible(Arrivals);
+            EnsureLastVisible(Logs);
         }
 
         private void EnsureLastVisible(ListBox list)

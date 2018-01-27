@@ -90,7 +90,7 @@ namespace una.regataiade.excel
             _sheet = null;
         }
 
-        public void AddRaceTime(RaceTime raceTime)
+        public bool AddRaceTime(RaceTime raceTime)
         {
             if (!IsOpen())
                 throw new Exception("No excel link");
@@ -107,6 +107,7 @@ namespace una.regataiade.excel
                     _sheet.Cells[raceTime.Order, 3] = raceTime.Order;
                     _sheet.Cells[raceTime.Order, 4] = raceTime.Arrival;
                 }
+                return true;
             }
             catch (Exception)
             {

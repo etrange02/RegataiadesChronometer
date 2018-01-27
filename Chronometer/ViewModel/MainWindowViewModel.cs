@@ -28,8 +28,8 @@ namespace Chronometer.ViewModel
         public RelayCommand OpenExcelCommand { get; private set; }
         public RelayCommand LockSheetPropertiesCommand { get; private set; }
         public RelayCommand UnlockSheetPropertiesCommand { get; private set; }
-        public ObservableCollection<RaceTime> Departures { get; set; } = new ObservableCollection<RaceTime>();
-        public ObservableCollection<RaceTime> Arrivals { get; set; } = new ObservableCollection<RaceTime>();
+        public ObservableCollection<RaceTimeViewModel> Departures { get; set; } = new ObservableCollection<RaceTimeViewModel>();
+        public ObservableCollection<RaceTimeViewModel> Arrivals { get; set; } = new ObservableCollection<RaceTimeViewModel>();
         public ObservableCollection<string> Logs { get; set; } = new ObservableCollection<string>();        
 
         public MainWindowViewModel()
@@ -51,26 +51,30 @@ namespace Chronometer.ViewModel
                 };
                 ComPort = "COM1";
 
-                Departures.Add(new RaceTime
+                Departures.Add(new RaceTimeViewModel(new RaceTime
                 {
                     Order = 1,
                     Departure = "00.00.00.000"
-                });
-                Departures.Add(new RaceTime
+
+                }));
+                Departures.Add(new RaceTimeViewModel(new RaceTime
                 {
                     Order = 2,
                     Departure = "00.02.00.000"
-                });
-                Arrivals.Add(new RaceTime
+
+                }));
+                Arrivals.Add(new RaceTimeViewModel(new RaceTime
                 {
                     Order = 3,
                     Departure = "00.00.00.000"
-                });
-                Arrivals.Add(new RaceTime
+                }));
+                Arrivals.Add(new RaceTimeViewModel(new RaceTime
                 {
                     Order = 4,
                     Departure = "00.02.00.000"
-                });
+                }));
+                Logs.Add("log 1");
+                Logs.Add("log 2");
             }
 
             InitializeTraceFileMenuItemCommand = new RelayCommand(ExecuteInitializeTraceFileMenuItemCommand);
@@ -186,21 +190,16 @@ namespace Chronometer.ViewModel
             }
         }
 
-        private bool _canBeep = true;
-        public bool CanBeep
-        {
-            get { return _canBeep; }
-            set { Set(ref _canBeep, value); }
-        }
-
         #region File
         private void ExecuteInitializeTraceFileMenuItemCommand()
         {
             _file?.Close();
             _file = File.Open("Trace_" + DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss") + ".txt", FileMode.CreateNew);
 
-            _writer = new StreamWriter(_file);
-            _writer.AutoFlush = true;
+            _writer = new StreamWriter(_file)
+            {
+                AutoFlush = true
+            };
             _writer.WriteLine("Fichier d'enregistrement des impulsions du chronomètre TAG HEUER");
 
             if (_chronograph != null)
@@ -262,33 +261,48 @@ namespace Chronometer.ViewModel
             {
                 var res = _chronograph.Interpret(_serialPortManager.SerialPort);
                 res.Order += _worksheetManager.Offset;
+                var raceTimeViewModel = new RaceTimeViewModel(res)
+                {
+                    Resend = new GalaSoft.MvvmLight.Command.RelayCommand<RaceTimeViewModel>(x => SendRaceTime(x))
+                };
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
                 {
                     if (res.Departure != null)
                     {
-                        Departures.Add(res);
+                        Departures.Add(raceTimeViewModel);
                         _writer.WriteLine($"1-{res.Order}-{res.Departure}");
                     }
                     else if (res.Arrival != null)
                     {
-                        Arrivals.Add(res);
+                        Arrivals.Add(raceTimeViewModel);
                         _writer.WriteLine($"2-{res.Order}-{res.Arrival}");
                     }
                 });
 
-                try
-                {
-                    _worksheetManager.AddRaceTime(res);
-                }
-                catch (Exception exception)
-                {
-                    Logs.Add(exception.Message);
-                    BeepSound();
-                }
+                SendRaceTime(raceTimeViewModel);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 // I said no crash !
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    Logs.Add(ex.Message);
+                });
+            }
+        }
+
+        private void SendRaceTime(RaceTimeViewModel raceTime)
+        {
+            try
+            {
+                raceTime.Saved = _worksheetManager.AddRaceTime(raceTime.RaceTime);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    Logs.Add(ex.Message);
+                });
             }
         }
         #endregion
@@ -334,11 +348,22 @@ namespace Chronometer.ViewModel
         }
 
         #endregion
+    }
 
-        public void BeepSound()
+    public class MainWindowViewModelDesignData : MainWindowViewModel
+    {
+        public new ObservableCollection<RaceTime> Departures { get; set; } = new ObservableCollection<RaceTime>
         {
-            if (CanBeep)
-                Console.Beep();
-        }
+            new RaceTime
+            {
+                Departure = "00:00:00",
+                Order = 1,
+            },
+            new RaceTime
+            {
+                Departure = "00:00:00",
+                Order = 2,
+            }
+        };
     }
 }
