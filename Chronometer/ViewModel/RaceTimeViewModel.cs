@@ -10,6 +10,15 @@ namespace Chronometer.ViewModel
         public RaceTimeViewModel(RaceTime raceTime)
         {
             RaceTime = raceTime;
+
+            if (IsInDesignMode)
+            {
+                RaceTime = new RaceTime
+                {
+                    Order = 3,
+                    Departure = "00:01:20.6"
+                };
+            }
         }
 
         public RelayCommand<RaceTimeViewModel> Resend { get; set; }

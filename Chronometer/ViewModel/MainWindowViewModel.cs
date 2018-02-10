@@ -40,42 +40,42 @@ namespace Chronometer.ViewModel
                 ChronographFactory.CreateCP520Chronograph()
             };
 
-            if (IsInDesignMode)
-            {
-                Chronograph = Chronographies[0];
-                AvailableComPorts = new ObservableCollection<string>
-                {
-                    "COM1",
-                    "COM2",
-                    "COM3"
-                };
-                ComPort = "COM1";
+            //if (IsInDesignMode)
+            //{
+            //    Chronograph = Chronographies[0];
+            //    AvailableComPorts = new ObservableCollection<string>
+            //    {
+            //        "COM1",
+            //        "COM2",
+            //        "COM3"
+            //    };
+            //    ComPort = "COM1";
 
-                Departures.Add(new RaceTimeViewModel(new RaceTime
-                {
-                    Order = 1,
-                    Departure = "00.00.00.000"
+            //    Departures.Add(new RaceTimeViewModel(new RaceTime
+            //    {
+            //        Order = 1,
+            //        Departure = "00.00.00.000"
 
-                }));
-                Departures.Add(new RaceTimeViewModel(new RaceTime
-                {
-                    Order = 2,
-                    Departure = "00.02.00.000"
+            //    }));
+            //    Departures.Add(new RaceTimeViewModel(new RaceTime
+            //    {
+            //        Order = 2,
+            //        Departure = "00.02.00.000"
 
-                }));
-                Arrivals.Add(new RaceTimeViewModel(new RaceTime
-                {
-                    Order = 3,
-                    Departure = "00.00.00.000"
-                }));
-                Arrivals.Add(new RaceTimeViewModel(new RaceTime
-                {
-                    Order = 4,
-                    Departure = "00.02.00.000"
-                }));
-                Logs.Add("log 1");
-                Logs.Add("log 2");
-            }
+            //    }));
+            //    Arrivals.Add(new RaceTimeViewModel(new RaceTime
+            //    {
+            //        Order = 3,
+            //        Departure = "00.00.00.000"
+            //    }));
+            //    Arrivals.Add(new RaceTimeViewModel(new RaceTime
+            //    {
+            //        Order = 4,
+            //        Departure = "00.02.00.000"
+            //    }));
+            //    Logs.Add("log 1");
+            //    Logs.Add("log 2");
+            //}
 
             InitializeTraceFileMenuItemCommand = new RelayCommand(ExecuteInitializeTraceFileMenuItemCommand);
             ClearListMenuItemCommand = new RelayCommand(ExecuteClearListMenuItemCommand);
@@ -352,18 +352,24 @@ namespace Chronometer.ViewModel
 
     public class MainWindowViewModelDesignData : MainWindowViewModel
     {
-        public new ObservableCollection<RaceTime> Departures { get; set; } = new ObservableCollection<RaceTime>
+        public new ObservableCollection<RaceTimeViewModel> Departures { get; set; } = new ObservableCollection<RaceTimeViewModel>
         {
-            new RaceTime
+            new RaceTimeViewModel(new RaceTime
+                {
+                    Departure = "00:00:00",
+                    Order = 1,
+                })
             {
-                Departure = "00:00:00",
-                Order = 1,
+                Saved = true,
             },
-            new RaceTime
+            new RaceTimeViewModel(new RaceTime
+                {
+                    Departure = "00:00:00",
+                    Order = 2,
+                })
             {
-                Departure = "00:00:00",
-                Order = 2,
-            }
+                Saved = false,
+            },
         };
     }
 }
